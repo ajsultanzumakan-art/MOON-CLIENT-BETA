@@ -42,7 +42,7 @@ public class MoonClient implements ClientModInitializer {
 
             if (client.options == null) return;
 
-            boolean enabled = false;
+            boolean enabled = ModuleManager.isEnabled("FullBright");
 
             if (enabled) {
                 if (originalGamma == null) {
