@@ -15,6 +15,8 @@ public class MoonClient implements ClientModInitializer {
 
     private static KeyMapping openMenu;
 
+    private static Double originalGamma = null;
+
     @Override
     public void onInitializeClient() {
 
@@ -30,12 +32,28 @@ public class MoonClient implements ClientModInitializer {
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+
             while (openMenu.consumeClick()) {
                 if (client.screen == null) {
                     client.setScreen(new MoonScreen());
                 } else if (client.screen instanceof MoonScreen) {
                     client.setScreen(null);
                 }
+            }
+
+            if (client.options == null) return;
+
+            boolean enabled = ModuleManager.isEnabled("FullBright");
+
+            if (enabled) {
+                if (originalGamma == null) {
+                    originalGamma = client.options.gamma().get();
+                }
+
+                client.options.gamma().set(16.0);
+            } else if (originalGamma != null) {
+                client.options.gamma().set(originalGamma);
+                originalGamma = null;
             }
         });
 
