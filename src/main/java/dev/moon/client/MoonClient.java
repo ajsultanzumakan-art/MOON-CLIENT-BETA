@@ -14,7 +14,6 @@ import net.minecraft.resources.Identifier;
 public class MoonClient implements ClientModInitializer {
 
     private static KeyMapping openMenu;
-
     private static Double originalGamma = null;
 
     @Override
@@ -49,7 +48,6 @@ public class MoonClient implements ClientModInitializer {
                 if (originalGamma == null) {
                     originalGamma = client.options.gamma().get();
                 }
-
                 client.options.gamma().set(16.0);
             } else if (originalGamma != null) {
                 client.options.gamma().set(originalGamma);
