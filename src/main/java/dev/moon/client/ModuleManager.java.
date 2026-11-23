@@ -1,12 +1,17 @@
 package dev.moon.client;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import net.fabricmc.loader.api.FabricLoader;
+import java.nio.file.*;
+import java.util.*;
 
 public final class ModuleManager {
 
     private static final Map<String, Boolean> MODULES =
             new LinkedHashMap<>();
+
+    private static final Path FILE =
+            FabricLoader.getInstance().getConfigDir()
+                    .resolve("moonclient.properties");
 
     static {
         MODULES.put("FullBright", false);
@@ -15,6 +20,7 @@ public final class ModuleManager {
         MODULES.put("Player ESP", false);
         MODULES.put("Pearl Bind", false);
         MODULES.put("Auto Totem", false);
+        load();
     }
 
     private ModuleManager() {}
@@ -24,14 +30,46 @@ public final class ModuleManager {
     }
 
     public static void setEnabled(String name, boolean enabled) {
-        if (MODULES.containsKey(name)) {
-            MODULES.put(name, enabled);
-        }
+        if (!MODULES.containsKey(name)) return;
+        MODULES.put(name, enabled);
+        save();
     }
 
     public static boolean toggle(String name) {
-        boolean next = !isEnabled(name);
-        setEnabled(name, next);
-        return next;
+        boolean value = !isEnabled(name);
+        setEnabled(name, value);
+        return value;
+    }
+
+    private static void load() {
+        Properties p = new Properties();
+        if (!Files.exists(FILE)) return;
+
+        try (var in = Files.newInputStream(FILE)) {
+            p.load(in);
+            MODULES.replaceAll((name, old) ->
+                    Boolean.parseBoolean(
+                            p.getProperty(name, old.toString())
+                    )
+            );
+        } catch (Exception e) {
+            System.err.println("[MOON] Load error: " + e);
+        }
+    }
+
+    private static void save() {
+        Properties p = new Properties();
+        MODULES.forEach((k, v) ->
+                p.setProperty(k, v.toString())
+        );
+
+        try {
+            Files.createDirectories(FILE.getParent());
+            try (var out = Files.newOutputStream(FILE)) {
+                p.store(out, "MOON CLIENT");
+            }
+        } catch (Exception e) {
+            System.err.println("[MOON] Save error: " + e);
+        }
     }
 }
