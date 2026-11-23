@@ -10,14 +10,6 @@ public class MoonScreen extends Screen {
 
     private String category = "Combat";
 
-    private boolean killAura = false;
-    private boolean fullBright = false;
-    private boolean hud = true;
-    private boolean targetHud = true;
-    private boolean playerEsp = false;
-    private boolean pearlBind = false;
-    private boolean autoTotem = false;
-
     public MoonScreen() {
         super(Component.literal("MOON CLIENT BETA"));
     }
@@ -27,94 +19,70 @@ public class MoonScreen extends Screen {
         int left = width / 2 - 190;
         int top = height / 2 - 115;
 
-        addRenderableWidget(Button.builder(
-                Component.literal("Combat"),
-                b -> changeCategory("Combat")
-        ).bounds(left + 10, top + 45, 85, 22).build());
+        addCategory("Combat", left, top, 45);
+        addCategory("Render", left, top, 73);
+        addCategory("Movement", left, top, 101);
+        addCategory("Misc", left, top, 129);
 
-        addRenderableWidget(Button.builder(
-                Component.literal("Render"),
-                b -> changeCategory("Render")
-        ).bounds(left + 10, top + 73, 85, 22).build());
+        int x = left + 115;
+        int y = top + 48;
 
-        addRenderableWidget(Button.builder(
-                Component.literal("Movement"),
-                b -> changeCategory("Movement")
-        ).bounds(left + 10, top + 101, 85, 22).build());
+        if (category.equals("Render")) {
+            addToggle("FullBright", x, y);
+            addToggle("HUD", x, y + 30);
+            addToggle("Target HUD", x, y + 60);
+            addToggle("Player ESP", x, y + 90);
+        }
 
-        addRenderableWidget(Button.builder(
-                Component.literal("Misc"),
-                b -> changeCategory("Misc")
-        ).bounds(left + 10, top + 129, 85, 22).build());
+        if (category.equals("Misc")) {
+            addToggle("Pearl Bind", x, y);
+            addToggle("Auto Totem", x, y + 30);
+        }
 
-        addModuleButtons(left, top);
-        
+        if (category.equals("Movement")) {
+            addRenderableWidget(Button.builder(
+                    Component.literal("Coming soon"),
+                    b -> {}
+            ).bounds(x, y, 145, 22).build());
+        }
+
+        if (category.equals("Combat")) {
+            addRenderableWidget(Button.builder(
+                    Component.literal("Combat (later)"),
+                    b -> {}
+            ).bounds(x, y, 145, 22).build());
+        }
+
         addRenderableWidget(Button.builder(
                 Component.literal("Close"),
                 b -> onClose()
         ).bounds(left + 135, top + 180, 120, 22).build());
     }
 
-    private void changeCategory(String name) {
-        category = name;
-        clearWidgets();
-        init();
+    private void addCategory(String name, int left, int top, int y) {
+        addRenderableWidget(Button.builder(
+                Component.literal(name),
+                b -> {
+                    category = name;
+                    clearWidgets();
+                    init();
+                }
+        ).bounds(left + 10, top + y, 85, 22).build());
     }
 
-    private void addModuleButtons(int left, int top) {
-        int x = left + 115;
-        int y = top + 48;
-
-        if (category.equals("Combat")) {
-            addToggle("KillAura", killAura, y,
-                    value -> killAura = value);
-        }
-
-        if (category.equals("Render")) {
-            addToggle("FullBright", fullBright, y,
-                    value -> fullBright = value);
-            addToggle("HUD", hud, y + 30,
-                    value -> hud = value);
-            addToggle("Target HUD", targetHud, y + 60,
-                    value -> targetHud = value);
-            addToggle("Player ESP", playerEsp, y + 90,
-                    value -> playerEsp = value);
-        }
-
-        if (category.equals("Movement")) {
-            addRenderableWidget(Button.builder(
-                    Component.literal("No modules yet"),
-                    b -> {}
-            ).bounds(x, y, 145, 22).build());
-        }
-
-        if (category.equals("Misc")) {
-            addToggle("Pearl Bind", pearlBind, y,
-                    value -> pearlBind = value);
-            addToggle("Auto Totem", autoTotem, y + 30,
-                    value -> autoTotem = value);
-        }
-    }
-
-    private void addToggle(
-            String name,
-            boolean enabled,
-            int y,
-            java.util.function.Consumer<Boolean> setter
-    ) {
-        int left = width / 2 - 190;
+    private void addToggle(String name, int x, int y) {
+        boolean enabled = ModuleManager.isEnabled(name);
 
         addRenderableWidget(Button.builder(
-                Component.literal(name + " : " +
-                        (enabled ? "ON" : "OFF")),
+                Component.literal(name + " : " + (enabled ? "ON" : "OFF")),
                 button -> {
-                    boolean next = !enabled;
-                    setter.accept(next);
+                    boolean next = ModuleManager.toggle(name);
+
                     button.setMessage(Component.literal(
                             name + " : " + (next ? "ON" : "OFF")
                     ));
                 }
-        ).bounds(left + 115, y, 145, 22).build());
+        ).bounds(x, y, 145, 22).build());
     }
 
     @Override
@@ -147,12 +115,6 @@ public class MoonScreen extends Screen {
         graphics.drawString(
                 font, "2.0.0 BETA",
                 left + 295, top + 12, 0xFFB8C9E8
-        );
-
-        graphics.fill(
-                left + 105, top + 38,
-                left + 106, top + 170,
-                0xFF34496D
         );
 
         graphics.drawString(
