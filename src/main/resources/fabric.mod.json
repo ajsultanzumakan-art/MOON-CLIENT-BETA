@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "moonclient",
+  "version": "${version}",
+  "name": "MOON CLIENT BETA",
+  "description": "Moon Client for Minecraft 1.21.11",
+  "authors": ["Moon Team"],
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.moon.client.MoonClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.18.1",
+    "minecraft": "1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
