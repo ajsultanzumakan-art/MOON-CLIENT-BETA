@@ -23,12 +23,14 @@ public class MoonClient implements ClientModInitializer {
                 Identifier.fromNamespaceAndPath("moonclient", "main")
         );
 
-        openMenu = KeyBindingHelper.registerKeyBinding(new KeyMapping(
-                "key.moonclient.open_menu",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_RIGHT_SHIFT,
-                category
-        ));
+        openMenu = KeyBindingHelper.registerKeyBinding(
+                new KeyMapping(
+                        "key.moonclient.open_menu",
+                        InputConstants.Type.KEYSYM,
+                        GLFW.GLFW_KEY_RIGHT_SHIFT,
+                        category
+                )
+        );
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
 
@@ -42,13 +44,16 @@ public class MoonClient implements ClientModInitializer {
 
             if (client.options == null) return;
 
-            boolean enabled = ModuleManager.isEnabled("FullBright");
+            boolean enabled =
+                    dev.moon.client.ModuleManager.isEnabled("FullBright");
 
             if (enabled) {
                 if (originalGamma == null) {
                     originalGamma = client.options.gamma().get();
                 }
+
                 client.options.gamma().set(16.0);
+
             } else if (originalGamma != null) {
                 client.options.gamma().set(originalGamma);
                 originalGamma = null;
