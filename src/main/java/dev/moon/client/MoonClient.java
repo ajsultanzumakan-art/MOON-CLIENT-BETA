@@ -15,10 +15,6 @@ public class MoonClient implements ClientModInitializer {
 
     private static KeyMapping openMenu;
 
-    public static boolean autoSprint = false;
-    public static boolean fullBright = false;
-    public static boolean hudEnabled = true;
-
     @Override
     public void onInitializeClient() {
 
@@ -29,22 +25,17 @@ public class MoonClient implements ClientModInitializer {
         openMenu = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.moonclient.open_menu",
                 InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_K,
+                GLFW.GLFW_KEY_RIGHT_SHIFT,
                 category
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-
             while (openMenu.consumeClick()) {
                 if (client.screen == null) {
                     client.setScreen(new MoonScreen());
                 } else if (client.screen instanceof MoonScreen) {
                     client.setScreen(null);
                 }
-            }
-
-            if (client.player != null && client.screen == null && autoSprint) {
-                client.player.setSprinting(client.options.keyUp.isDown());
             }
         });
 
