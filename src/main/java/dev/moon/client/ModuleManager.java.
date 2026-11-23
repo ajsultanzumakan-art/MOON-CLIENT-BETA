@@ -1,0 +1,38 @@
+
+package dev.moon.client;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+public final class ModuleManager {
+
+    private static final Map<String, Boolean> MODULES =
+            new LinkedHashMap<>();
+
+    static {
+        MODULES.put("FullBright", false);
+        MODULES.put("HUD", true);
+        MODULES.put("Target HUD", true);
+        MODULES.put("Player ESP", false);
+        MODULES.put("Pearl Bind", false);
+        MODULES.put("Auto Totem", false);
+    }
+
+    private ModuleManager() {}
+
+    public static boolean isEnabled(String name) {
+        return MODULES.getOrDefault(name, false);
+    }
+
+    public static void setEnabled(String name, boolean enabled) {
+        if (MODULES.containsKey(name)) {
+            MODULES.put(name, enabled);
+        }
+    }
+
+    public static boolean toggle(String name) {
+        boolean next = !isEnabled(name);
+        setEnabled(name, next);
+        return next;
+    }
+}
