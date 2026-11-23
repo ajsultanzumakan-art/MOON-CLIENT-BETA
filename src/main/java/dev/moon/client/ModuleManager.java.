@@ -1,3 +1,4 @@
+
 package dev.moon.client;
 
 import net.fabricmc.loader.api.FabricLoader;
@@ -10,7 +11,8 @@ public final class ModuleManager {
             new LinkedHashMap<>();
 
     private static final Path FILE =
-            FabricLoader.getInstance().getConfigDir()
+            FabricLoader.getInstance()
+                    .getConfigDir()
                     .resolve("moonclient.properties");
 
     static {
@@ -29,27 +31,30 @@ public final class ModuleManager {
         return MODULES.getOrDefault(name, false);
     }
 
-    public static void setEnabled(String name, boolean enabled) {
-        if (!MODULES.containsKey(name)) return;
-        MODULES.put(name, enabled);
-        save();
-    }
-
     public static boolean toggle(String name) {
         boolean value = !isEnabled(name);
-        setEnabled(name, value);
+
+        if (MODULES.containsKey(name)) {
+            MODULES.put(name, value);
+            save();
+        }
+
         return value;
     }
 
     private static void load() {
-        Properties p = new Properties();
         if (!Files.exists(FILE)) return;
 
-        try (var in = Files.newInputStream(FILE)) {
-            p.load(in);
-            MODULES.replaceAll((name, old) ->
+        Properties properties = new Properties();
+
+        try (var input = Files.newInputStream(FILE)) {
+            properties.load(input);
+
+            MODULES.replaceAll((name, oldValue) ->
                     Boolean.parseBoolean(
-                            p.getProperty(name, old.toString())
+                            properties.getProperty(
+                                    name, oldValue.toString()
+                            )
                     )
             );
         } catch (Exception e) {
@@ -58,15 +63,17 @@ public final class ModuleManager {
     }
 
     private static void save() {
-        Properties p = new Properties();
-        MODULES.forEach((k, v) ->
-                p.setProperty(k, v.toString())
+        Properties properties = new Properties();
+
+        MODULES.forEach((name, value) ->
+                properties.setProperty(name, value.toString())
         );
 
         try {
             Files.createDirectories(FILE.getParent());
-            try (var out = Files.newOutputStream(FILE)) {
-                p.store(out, "MOON CLIENT");
+
+            try (var output = Files.newOutputStream(FILE)) {
+                properties.store(output, "MOON CLIENT");
             }
         } catch (Exception e) {
             System.err.println("[MOON] Save error: " + e);
