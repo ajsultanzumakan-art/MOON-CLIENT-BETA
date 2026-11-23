@@ -1,3 +1,4 @@
+
 package dev.moon.client;
 
 import net.minecraft.client.gui.GuiGraphics;
@@ -7,70 +8,156 @@ import net.minecraft.network.chat.Component;
 
 public class MoonScreen extends Screen {
 
+    private String category = "Combat";
+
+    private boolean killAura = false;
+    private boolean fullBright = false;
+    private boolean hud = true;
+    private boolean targetHud = true;
+    private boolean playerEsp = false;
+    private boolean pearlBind = false;
+    private boolean autoTotem = false;
+
     public MoonScreen() {
         super(Component.literal("MOON CLIENT BETA"));
     }
 
     @Override
     protected void init() {
-        int center = width / 2;
-        int startY = height / 2 - 45;
-        int buttonWidth = 180;
+        int left = width / 2 - 190;
+        int top = height / 2 - 115;
 
         addRenderableWidget(Button.builder(
-                getSprintText(),
-                button -> {
-                    MoonClient.autoSprint = !MoonClient.autoSprint;
-                    button.setMessage(getSprintText());
-                }
-        ).bounds(center - buttonWidth / 2, startY, buttonWidth, 22).build());
+                Component.literal("Combat"),
+                b -> changeCategory("Combat")
+        ).bounds(left + 10, top + 45, 85, 22).build());
 
         addRenderableWidget(Button.builder(
-                getHudText(),
-                button -> {
-                    MoonClient.hudEnabled = !MoonClient.hudEnabled;
-                    button.setMessage(getHudText());
-                }
-        ).bounds(center - buttonWidth / 2, startY + 30, buttonWidth, 22).build());
+                Component.literal("Render"),
+                b -> changeCategory("Render")
+        ).bounds(left + 10, top + 73, 85, 22).build());
 
+        addRenderableWidget(Button.builder(
+                Component.literal("Movement"),
+                b -> changeCategory("Movement")
+        ).bounds(left + 10, top + 101, 85, 22).build());
+
+        addRenderableWidget(Button.builder(
+                Component.literal("Misc"),
+                b -> changeCategory("Misc")
+        ).bounds(left + 10, top + 129, 85, 22).build());
+
+        addModuleButtons(left, top);
+        
         addRenderableWidget(Button.builder(
                 Component.literal("Close"),
-                button -> onClose()
-        ).bounds(center - buttonWidth / 2, startY + 65, buttonWidth, 22).build());
+                b -> onClose()
+        ).bounds(left + 135, top + 180, 120, 22).build());
     }
 
-    private Component getSprintText() {
-        return Component.literal("Auto Sprint: " +
-                (MoonClient.autoSprint ? "ON" : "OFF"));
+    private void changeCategory(String name) {
+        category = name;
+        clearWidgets();
+        init();
     }
 
-    private Component getHudText() {
-        return Component.literal("HUD: " +
-                (MoonClient.hudEnabled ? "ON" : "OFF"));
+    private void addModuleButtons(int left, int top) {
+        int x = left + 115;
+        int y = top + 48;
+
+        if (category.equals("Combat")) {
+            addToggle("KillAura", killAura, y,
+                    value -> killAura = value);
+        }
+
+        if (category.equals("Render")) {
+            addToggle("FullBright", fullBright, y,
+                    value -> fullBright = value);
+            addToggle("HUD", hud, y + 30,
+                    value -> hud = value);
+            addToggle("Target HUD", targetHud, y + 60,
+                    value -> targetHud = value);
+            addToggle("Player ESP", playerEsp, y + 90,
+                    value -> playerEsp = value);
+        }
+
+        if (category.equals("Movement")) {
+            addRenderableWidget(Button.builder(
+                    Component.literal("No modules yet"),
+                    b -> {}
+            ).bounds(x, y, 145, 22).build());
+        }
+
+        if (category.equals("Misc")) {
+            addToggle("Pearl Bind", pearlBind, y,
+                    value -> pearlBind = value);
+            addToggle("Auto Totem", autoTotem, y + 30,
+                    value -> autoTotem = value);
+        }
+    }
+
+    private void addToggle(
+            String name,
+            boolean enabled,
+            int y,
+            java.util.function.Consumer<Boolean> setter
+    ) {
+        int left = width / 2 - 190;
+
+        addRenderableWidget(Button.builder(
+                Component.literal(name + " : " +
+                        (enabled ? "ON" : "OFF")),
+                button -> {
+                    boolean next = !enabled;
+                    setter.accept(next);
+                    button.setMessage(Component.literal(
+                            name + " : " + (next ? "ON" : "OFF")
+                    ));
+                }
+        ).bounds(left + 115, y, 145, 22).build());
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX,
-                       int mouseY, float delta) {
+    public void render(
+            GuiGraphics graphics,
+            int mouseX,
+            int mouseY,
+            float delta
+    ) {
+        graphics.fill(0, 0, width, height, 0xB0000000);
 
-        graphics.fill(0, 0, width, height, 0xC0101018);
-
-        int center = width / 2;
+        int left = width / 2 - 190;
+        int top = height / 2 - 115;
 
         graphics.fill(
-                center - 115, height / 2 - 90,
-                center + 115, height / 2 + 100,
-                0xFF171B2B
+                left, top, left + 380, top + 220,
+                0xFF101522
         );
 
-        graphics.drawCenteredString(
+        graphics.fill(
+                left, top, left + 380, top + 32,
+                0xFF202D48
+        );
+
+        graphics.drawString(
                 font, "MOON CLIENT BETA",
-                center, height / 2 - 75, 0xFF75A9FF
+                left + 12, top + 12, 0xFF8CB9FF
         );
 
-        graphics.drawCenteredString(
-                font, "Version 2.1",
-                center, height / 2 - 58, 0xFFFFFFFF
+        graphics.drawString(
+                font, "2.0.0 BETA",
+                left + 295, top + 12, 0xFFB8C9E8
+        );
+
+        graphics.fill(
+                left + 105, top + 38,
+                left + 106, top + 170,
+                0xFF34496D
+        );
+
+        graphics.drawString(
+                font, category.toUpperCase(),
+                left + 115, top + 35, 0xFF8CB9FF
         );
 
         super.render(graphics, mouseX, mouseY, delta);
